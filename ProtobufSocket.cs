@@ -19,6 +19,7 @@ public class ProtobufSocket : ProtocolSocket
 {
     public static ProtobufSocket main;
 
+    private List<SocketEvent> dispatchEvents = new List<SocketEvent>();
     private Dictionary<uint, Delegate> listeners = new Dictionary<uint, Delegate>();
 
     protected override void Start()
@@ -26,15 +27,20 @@ public class ProtobufSocket : ProtocolSocket
         base.Start();
         
         //Listen
-        connectSucceed += OnConnectSucceed;
         received += OnReceived;
 
         main = this;
     }
 
-    private void OnConnectSucceed()
+    void Update()
     {
+        while (dispatchEvents.Count > 0)
+        {
+            SocketEvent evt = dispatchEvents[0];
+            dispatchEvents.RemoveAt(0);
 
+            listeners[evt.protocolId].DynamicInvoke(evt.data);
+        }
     }
 
     private void OnReceived(uint protocolId, byte[] buffer)
@@ -46,7 +52,8 @@ public class ProtobufSocket : ProtocolSocket
             using (MemoryStream s = new MemoryStream(buffer))
             {
                 object data = Serializer.NonGeneric.Deserialize(type, s);
-                listener.DynamicInvoke(data);
+                dispatchEvents.Add(new SocketEvent(protocolId, data));
+                //listener.DynamicInvoke(data);
             }
         }
     }
@@ -96,6 +103,17 @@ public class ProtobufSocket : ProtocolSocket
                 listeners.Remove(protocolId);
             else
                 listeners[protocolId] = listener;
+        }
+    }
+
+    private struct SocketEvent
+    {
+        public uint protocolId;
+        public object data;
+        public SocketEvent(uint protocolId, object data)
+        {
+            this.protocolId = protocolId;
+            this.data = data;
         }
     }
 }

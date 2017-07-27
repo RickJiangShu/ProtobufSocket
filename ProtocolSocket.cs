@@ -20,6 +20,7 @@ public class ProtocolSocket : MonoBehaviour
     public string host;//IP地址
     public int port;//端口
     public byte protocolHead;//协议头
+    public bool connectOnStart;
 
     #region 事件
     /// <summary>
@@ -54,7 +55,8 @@ public class ProtocolSocket : MonoBehaviour
 
     protected virtual void Start()
     {
-        Connect();
+        if(connectOnStart)
+            Connect();
     }
 
     /// <summary>

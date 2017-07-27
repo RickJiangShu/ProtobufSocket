@@ -17,6 +17,8 @@ public delegate void ProtobufCallback<T>(T data);
 /// </summary>
 public class ProtobufSocket : ProtocolSocket
 {
+    public static ProtobufSocket main;
+
     private Dictionary<uint, Delegate> listeners = new Dictionary<uint, Delegate>();
 
     protected override void Start()
@@ -26,6 +28,8 @@ public class ProtobufSocket : ProtocolSocket
         //Listen
         connectSucceed += OnConnectSucceed;
         received += OnReceived;
+
+        main = this;
     }
 
     private void OnConnectSucceed()
@@ -81,7 +85,7 @@ public class ProtobufSocket : ProtocolSocket
         }
     }
 
-    public void Unlisten<T>(uint protocolId, ProtobufCallback<T> callback)
+    public void Unlisten<T>(uint protocolId, ProtobufCallback<T> callback) where T : IExtensible
     {
         Delegate listener;
         if (listeners.TryGetValue(protocolId, out listener))

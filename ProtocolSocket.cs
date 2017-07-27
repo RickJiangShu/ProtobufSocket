@@ -49,6 +49,14 @@ public class ProtocolSocket : MonoBehaviour
     public event Action<uint, byte[]> received;
     #endregion
 
+    #region 状态
+    /// <summary>
+    /// 是否连接中
+    /// </summary>
+    public bool isConnected { get { return tcp.Connected; } }
+
+    #endregion
+
     private byte[] receiveBuffer = new byte[0xffff];//设置一个缓冲区，用来保存数据
     private TcpClient tcp;
     private NetworkStream stream;
